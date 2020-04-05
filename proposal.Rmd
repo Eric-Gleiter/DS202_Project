@@ -1,0 +1,24 @@
+---
+title: "Project Proposal"
+author: "Eric Gleiter, Anyesha Ray, Brandon Xicon, Mckenna Goffinet"
+date: "4/6/2020"
+output: html_document
+---
+
+**Group members:**
+  Eric Gleiter
+  Anyesha Ray
+  Brandon Xicon
+  Mckenna Goffinet
+  
+**Data link:**
+  
+  [US-Accidents data set from kaggle](https://www.kaggle.com/sobhanmoosavi/us-accidents)
+  
+**Data Overview:**
+
+This data set contains data on traffic accidents in 49 US States from Feb 2016 to Dec 2019. In the data set we have access to location a description of the accident, the time of the accident, the severity of the accident, and more. The data set has 3 million rows to work with and very detailed information of each accident. The creator of the data set is a researcher for Lyft.
+
+**Plan for exploration:**
+
+Since the data set is so varied and detailed we can look into lots of different relationships. For example we have access to what kinds of traffic signals (IE stop signs, speed bumps, roundabouts, etc ...) and look for a relationship for which signal has the most accidents. Or is we want to look in another direction we can look at the data and group it by location to paint a picture of which regions of the US are safer drivers. Furthermore to extend the previous point since we have access to accident severity we can also further break down what could be meant by safer and get more into where severe accidents happen and what kind of situation is most likely to bring them  out, and then group by locations and see which regions or states are the most abnormally safe or dangerous based on that analysis. 
