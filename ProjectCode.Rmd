@@ -1,0 +1,50 @@
+---
+title: "Final Project"
+author: "Eric Gleiter, Anyesha Ray, Brandon Xicon, Mckenna Goffinet"
+date: "4/6/2020"
+output: html_document
+---
+
+**PLACE HOLDER FOR NOW**
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+#Takes a long time to run would recommmend only running once  
+severity <- read.csv("Severity.csv")
+start_time <- read.csv("Start_Time.csv")
+end_time <- read.csv("End_Time.csv")
+lat <- read.csv("Start_Lat.csv")
+long <- read.csv("Start_Lng.csv")
+city <- read.csv("City.csv")
+county <- read.csv("County.csv")
+state <- read.csv("State.csv")
+temp <- read.csv("Temperature.csv")
+wind <- read.csv("Wind_Speed.csv")
+visibilty <- read.csv( "Visibilty.csv")
+```
+
+```{r}
+#Joins all the data together will add more if we need more columns
+#Takes a long time to run would recommmend only running once  
+fullData <- severity %>%
+  inner_join(start_time) %>%
+  inner_join(end_time) %>%
+  inner_join(lat) %>%
+  inner_join(long) %>%
+  inner_join(city) %>%
+  inner_join(county) %>%
+  inner_join(state) %>%
+  inner_join(temp) %>%
+  inner_join(wind) %>%
+  inner_join(visibilty) %>%
+  select(-X) #deletes a column that is row number
+```
+
+```{r}
+#use a sub set of the data to test things
+Iowa <- fullData %>%
+  filter(State == "IA")
+```
