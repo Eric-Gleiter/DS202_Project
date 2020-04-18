@@ -1,36 +1,38 @@
 ```{r}
 library(tidyverse)
+install.packages("openintro")
+library(openintro)
 ```
 
 ```{r}
 #Takes a long time to run would recommmend only running once  
-severity <- read.csv("Severity.csv")
-start_time <- read.csv("Start_Time.csv")
-end_time <- read.csv("End_Time.csv")
-lat <- read.csv("Start_Lat.csv")
-long <- read.csv("Start_Lng.csv")
-city <- read.csv("City.csv")
-county <- read.csv("County.csv")
-state <- read.csv("State.csv")
-temp <- read.csv("Temperature.csv")
-wind <- read.csv("Wind_Speed.csv")
-visibilty <- read.csv( "Visibilty.csv")
+severityDS <- read.csv("Severity.csv")
+start_timeDS <- read.csv("Start_Time.csv")
+end_timeDS <- read.csv("End_Time.csv")
+latDS <- read.csv("Start_Lat.csv")
+longDS <- read.csv("Start_Lng.csv")
+cityDS <- read.csv("City.csv")
+countyDS <- read.csv("County.csv")
+stateDS <- read.csv("State.csv")
+tempDS <- read.csv("Temperature.csv")
+windDS <- read.csv("Wind_Speed.csv")
+visibiltyDS <- read.csv( "Visibilty.csv")
 ```
 
 ```{r}
 #Joins all the data together will add more if we need more columns
 #Takes a long time to run would recommmend only running once  
-fullData <- severity %>%
-  inner_join(start_time) %>%
-  inner_join(end_time) %>%
-  inner_join(lat) %>%
-  inner_join(long) %>%
-  inner_join(city) %>%
-  inner_join(county) %>%
-  inner_join(state) %>%
-  inner_join(temp) %>%
-  inner_join(wind) %>%
-  inner_join(visibilty) %>%
+fullData <- severityDS %>%
+  inner_join(start_timeDS) %>%
+  inner_join(end_timeDS) %>%
+  inner_join(latDS) %>%
+  inner_join(longDS) %>%
+  inner_join(cityDS) %>%
+  inner_join(countyDS) %>%
+  inner_join(stateDS) %>%
+  inner_join(tempDS) %>%
+  inner_join(windDS) %>%
+  inner_join(visibiltyDS) %>%
   select(-X) #deletes a column that is row number
 ```
 
@@ -38,4 +40,50 @@ fullData <- severity %>%
 #use a sub set of the data to test things
 Iowa <- fullData %>%
   filter(State == "IA")
+```
+
+```{r}
+library(maps)
+```
+
+```{r}
+IAcounties <- map_data("county") %>%
+  filter(region == "iowa") 
+
+IACleanData <- Iowa %>%
+  mutate(region = "iowa") %>%
+  mutate(subregion = tolower(County)) %>%
+  select(region, subregion,Severity) %>%
+  group_by(region,subregion) %>%
+  summarise(meanSeverity = mean(Severity)) %>%
+  right_join(IAcounties,by=c("region","subregion"))
+
+ggplot(IACleanData, aes(x=long,y=lat,fill = meanSeverity))+
+  geom_polygon(aes(group=group))+
+  labs(x="Longitude",y="Latitude",title = "Severity of Accidents in Iowa by County")
+
+
+```
+
+```{r}
+#plots the mean severity in every county in the us altough it appears some counites are missing
+fullCounties <- map_data("county")
+
+
+fullMapData <- fullData %>% 
+  mutate(region = tolower(abbr2state(State))) %>%
+  mutate(subregion = tolower(County)) %>%
+  select(region, subregion,Severity) %>%
+  group_by(region,subregion) %>%
+  summarise(meanSeverity = mean(Severity)) %>%
+  right_join(fullCounties,by=c("region","subregion"))
+
+ggplot(fullMapData, aes(x=long,y=lat,fill = meanSeverity))+
+  geom_polygon(aes(group=group)) +
+  labs(x="Longitude",y="Latitude",title = "Severity of Accidents in US by County")
+
+```
+
+```{r}
+?abbr2state
 ```
