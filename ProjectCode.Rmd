@@ -13,8 +13,16 @@ install.packages("tidyverse")
 if (!require("openintro")) {
 install.packages("openintro")
 }
+if (!require("lubridate")) {
+install.packages("lubridate")
+}
+if (!require("maps")) {
+install.packages("maps")
+}
 library(tidyverse)
 library(openintro) #used to quickly switch state names and abbrevations
+library(maps)
+library(lubridate)
 ```
 
 
@@ -85,5 +93,19 @@ fullMapData <- fullData %>%
 ggplot(fullMapData, aes(x=long,y=lat,fill = meanSeverity))+
   geom_polygon(aes(group=group)) +
   labs(x="Longitude",y="Latitude",title = "Severity of Accidents in US by County")
+
+```
+
+```{r}
+#The following reconverts all the date and time columns back together and get a numeric duration for the accident
+Full_Duration <- fullData %>%
+  unite(col = "Start_Date", c(Start_Year,Start_Month,Start_Day),sep = "-") %>%
+  unite(col = "FullStart_Time", c(Start_Date,Start_Time),sep = " ") %>%
+  unite(col = "End_Date", c(End_Year,End_Month,End_Day),sep = "-") %>%
+  unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
+  mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) #num of seconds of the accident
+
+ggplot(Full_Duration,aes(x=Severity, y=duration)) +
+  geom_point()
 
 ```
