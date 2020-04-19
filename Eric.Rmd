@@ -117,5 +117,12 @@ IADuration <- Iowa %>%
   unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
   mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) #num of seconds of the accident
 
+ggplot(IADuration,aes(x=Severity, y=duration)) +
+  geom_point()
 
+ggplot(IADuration, aes(x=Severity, y = Temperature.F.)) +
+  geom_point()
+
+ggplot(IADuration, aes(x=Severity, y = Wind_Speed.mph.)) +
+  geom_point()
 ```
