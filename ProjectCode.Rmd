@@ -19,6 +19,10 @@ install.packages("lubridate")
 if (!require("maps")) {
 install.packages("maps")
 }
+if (!require("plotly")) {
+install.packages("plotly")
+}
+library(plotly)
 library(tidyverse)
 library(openintro) #used to quickly switch state names and abbrevations
 library(maps)
@@ -105,7 +109,32 @@ Full_Duration <- fullData %>%
   unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
   mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) #num of seconds of the accident
 
+
 ggplot(Full_Duration,aes(x=Severity, y=duration)) +
   geom_point()
 
+```
+
+```{r}
+#decided to get rid of he data from 2016 in order to have data that includes full years as before the 2016 data starts in february which means january will be underrepresented
+time<-fullData %>%
+  filter(Start_Year!=2016)%>%
+  unite(col = "Start_Date2", c(Start_Year,Start_Month,Start_Day),sep = "-",remove=FALSE)%>%
+  group_by(Start_Date2) %>%
+  mutate(dayCount = n())
+ggplot(time,aes(x=Start_Month))+geom_bar()+labs(x="Month",title = "Frequency of accidents by month")+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))
+```
+
+
+```{r}
+time<-time %>%
+  distinct(Start_Date2,.keep_all = TRUE)
+time
+plot_ly(time,x=~Start_Day, y=~Start_Month,z=~Start_Year,type='scatter3d',mode='markers',color=~dayCount)
+```
+
+
+```{r}
+graph<-ggplot(time,aes(x=time$Start_Month, y=time$Start_Day,color=time$dayCount))+facet_wrap(time$Start_Year)+geom_point()+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+labs(x="Month",y="Day",color="Count")
+ggplotly(graph)
 ```
