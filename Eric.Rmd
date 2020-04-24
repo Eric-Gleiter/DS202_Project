@@ -71,6 +71,7 @@ IACleanData <- Iowa %>%
 
 ggplot(IACleanData, aes(x=long,y=lat,fill = meanSeverity))+
   geom_polygon(aes(group=group))+
+  scale_fill_continuous(type = "viridis")+
   labs(x="Longitude",y="Latitude",title = "Severity of Accidents in Iowa by County")
 
 
@@ -98,11 +99,15 @@ ggplot(fullCounties,aes(x=long,y=lat)) +
              aes(x=Start_Lng,y=Start_Lat),
              color='red', 
              alpha=0.5, 
-             size=0.02)
+             size=0.02)+ 
+  xlab("Longitude") + 
+  ylab("Latitude") + 
+  labs(title = "Accdient Locations by Longitude and Latitude")
 
 
 ggplot(meanSeverityMap, aes(x=long,y=lat,fill = meanSeverity))+
   geom_polygon(aes(group=group)) +
+  scale_fill_continuous(type = "viridis")+
   labs(x="Longitude",y="Latitude",title = "Severity of Accidents in US by County")
   
 ```
@@ -115,14 +120,36 @@ IADuration <- Iowa %>%
   unite(col = "FullStart_Time", c(Start_Date,Start_Time),sep = " ") %>%
   unite(col = "End_Date", c(End_Year,End_Month,End_Day),sep = "-") %>%
   unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
-  mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) #num of seconds of the accident
-
+  mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time)))))%>% #num of seconds of the accident
+  mutate(Severity = factor(Severity))
+  
 ggplot(IADuration,aes(x=Severity, y=duration)) +
-  geom_point()
+  geom_boxplot()
 
 ggplot(IADuration, aes(x=Severity, y = Temperature.F.)) +
-  geom_point()
+  geom_boxplot()
 
 ggplot(IADuration, aes(x=Severity, y = Wind_Speed.mph.)) +
-  geom_point()
+  geom_boxplot()
+```
+
+
+```{r}
+Full_Duration <- fullData %>%
+  unite(col = "Start_Date", c(Start_Year,Start_Month,Start_Day),sep = "-") %>%
+  unite(col = "FullStart_Time", c(Start_Date,Start_Time),sep = " ") %>%
+  unite(col = "End_Date", c(End_Year,End_Month,End_Day),sep = "-") %>%
+  unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
+  mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) %>%
+  mutate(Severity = factor(Severity))
+
+ggplot(Full_Duration,aes(x=Severity, y=duration)) +
+  geom_boxplot()
+
+ggplot(Full_Duration, aes(x=Severity, y = Temperature.F.)) +
+  geom_boxplot() 
+
+ggplot(Full_Duration, aes(x=Severity, y = Wind_Speed.mph.)) +
+  geom_boxplot()+ 
+  ylim(c(0,100))
 ```
