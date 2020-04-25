@@ -115,26 +115,46 @@ ggplot(Full_Duration,aes(x=Severity, y=duration)) +
 
 ```
 
+
 ```{r}
-#decided to get rid of he data from 2016 in order to have data that includes full years as before the 2016 data starts in february which means january will be underrepresented
+#decided to get rid of he data from 2016,2015 and 2020 in order to have data that includes full years as before the 2016 data starts in february which means january will be underrepresented
 time<-fullData %>%
   filter(Start_Year!=2016)%>%
-  unite(col = "Start_Date2", c(Start_Year,Start_Month,Start_Day),sep = "-",remove=FALSE)%>%
+  filter(Start_Year!=2015)%>%
+  filter(Start_Year!=2020)%>%
+  unite(col = "Start_Date2", c(Start_Year,Start_Day,Start_Month),sep = "-",remove=FALSE)%>%
   group_by(Start_Date2) %>%
   mutate(dayCount = n())
 ggplot(time,aes(x=Start_Month))+geom_bar()+labs(x="Month",title = "Frequency of accidents by month")+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))
 ```
 
 
+# ```{r}
+# time<-time %>%
+#   distinct(Start_Date2,.keep_all = TRUE)
+# time
+# plot_ly(time,x=~Start_Day, y=~Start_Month,z=~Start_Year,type='scatter3d',mode='markers',color=~dayCount)
+# ```
+
+
 ```{r}
-time<-time %>%
-  distinct(Start_Date2,.keep_all = TRUE)
-time
-plot_ly(time,x=~Start_Day, y=~Start_Month,z=~Start_Year,type='scatter3d',mode='markers',color=~dayCount)
+graph<-ggplot(time,aes(x=time$Start_Month, y=time$Start_Day,color=time$dayCount))+facet_wrap(time$Start_Year)+geom_point()+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+labs(x="Month",y="Day",color="Count")+ scale_colour_gradientn(colours = terrain.colors(10))
+ggplotly(graph)
 ```
 
+```{r}
+
+time$Severity<-as.factor(time$Severity)
+time$day<-ydm(time$Start_Date2)
+
+```
 
 ```{r}
-graph<-ggplot(time,aes(x=time$Start_Month, y=time$Start_Day,color=time$dayCount))+facet_wrap(time$Start_Year)+geom_point()+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+labs(x="Month",y="Day",color="Count")
+graph<-ggplot()+geom_line(aes(x=time$day,y=time$dayCount,color="Count vs Day"
+                              #,color=time$Severity
+                              ),data = time,stat = "identity")+labs(x="Month",y="Count")+geom_smooth()#+
+
+#scale_color_manual(values = c(""))
+
 ggplotly(graph)
 ```
