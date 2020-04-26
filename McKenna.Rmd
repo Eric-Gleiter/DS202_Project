@@ -1,34 +1,14 @@
 ---
-title: "Final Project"
-author: "Eric Gleiter, Anyesha Ray, Brandon Xicon, Mckenna Goffinet"
-date: "4/6/2020"
 output: html_document
 ---
 
-**PLACE HOLDER FOR NOW**
 ```{r}
-if (!require("tidyverse")) {
-install.packages("tidyverse")
-}
-if (!require("openintro")) {
-install.packages("openintro")
-}
-if (!require("lubridate")) {
-install.packages("lubridate")
-}
-if (!require("maps")) {
-install.packages("maps")
-}
-if (!require("plotly")) {
-install.packages("plotly")
-}
-library(plotly)
 library(tidyverse)
-library(openintro) #used to quickly switch state names and abbrevations
-library(maps)
+library(openintro)
 library(lubridate)
+library(maps)
+library(scales)
 ```
-
 
 ```{r}
 #Takes a long time to run would recommmend only running once  
@@ -52,6 +32,8 @@ endMonthDS <- read.csv("End_Month.csv")
 ```
 
 ```{r}
+#Code already in project code file
+
 #Joins all the data together will add more if we need more columns
 #Takes a long time to run would recommmend only running once  
 fullData <- severityDS %>%
@@ -72,36 +54,7 @@ fullData <- severityDS %>%
   inner_join(endDayDS) %>%
   inner_join(endMonthDS) %>%
   select(-X) #deletes a column that is row number
-```
 
-```{r}
-#use a sub set of the data to test things
-Iowa <- fullData %>%
-  filter(State == "IA")
-```
-
-
-```{r}
-#plots the mean severity in every county in the us altough it appears some counites are missing
-fullCounties <- map_data("county")
-
-
-fullMapData <- fullData %>% 
-  mutate(region = tolower(abbr2state(State))) %>%
-  mutate(subregion = tolower(County)) %>%
-  select(region, subregion,Severity) %>%
-  group_by(region,subregion) %>%
-  summarise(meanSeverity = mean(Severity)) %>%
-  right_join(fullCounties,by=c("region","subregion"))
-
-ggplot(fullMapData, aes(x=long,y=lat,fill = meanSeverity))+
-  geom_polygon(aes(group=group)) +
-  labs(x="Longitude",y="Latitude",title = "Severity of Accidents in US by County")
-
-```
-
-```{r}
-#The following reconverts all the date and time columns back together and get a numeric duration for the accident
 Full_Duration <- fullData %>%
   unite(col = "Start_Date", c(Start_Year,Start_Month,Start_Day),sep = "-") %>%
   unite(col = "FullStart_Time", c(Start_Date,Start_Time),sep = " ") %>%
@@ -109,59 +62,10 @@ Full_Duration <- fullData %>%
   unite(col = "FullEnd_Time", c(End_Date,End_Time),sep = " ") %>%
   mutate(duration = as.double(as.duration(interval(ymd_hms(FullStart_Time),ymd_hms(FullEnd_Time))))) #num of seconds of the accident
 
-
-ggplot(Full_Duration,aes(x=Severity, y=duration)) +
-  geom_point()
-
+fullCounties <- map_data("county")
 ```
 
-
-```{r}
-#decided to get rid of he data from 2016,2015 and 2020 in order to have data that includes full years as before the 2016 data starts in february which means january will be underrepresented
-time<-fullData %>%
-  filter(Start_Year!=2016)%>%
-  filter(Start_Year!=2015)%>%
-  filter(Start_Year!=2020)%>%
-  unite(col = "Start_Date2", c(Start_Year,Start_Day,Start_Month),sep = "-",remove=FALSE)%>%
-  group_by(Start_Date2) %>%
-  mutate(dayCount = n())
-ggplot(time,aes(x=Start_Month))+geom_bar()+labs(x="Month",title = "Frequency of accidents by month")+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))
-```
-
-
-```{r}
- time<-time %>%
-   distinct(Start_Date2,.keep_all = TRUE)
-# time
-# plot_ly(time,x=~Start_Day, y=~Start_Month,z=~Start_Year,type='scatter3d',mode='markers',color=~dayCount)
-```
-
-
-```{r}
-graph<-ggplot(time,aes(x=time$Start_Month, y=time$Start_Day,color=time$dayCount))+facet_wrap(time$Start_Year)+geom_point()+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+labs(x="Month",y="Day",color="Count",title = "Each day's accident number from 2017-2019")+ scale_colour_gradientn(colours = terrain.colors(10))
-ggplotly(graph)
-```
-
-```{r}
-
-time$Severity<-as.factor(time$Severity)
-time$day<-ydm(time$Start_Date2)
-
-```
-
-```{r}
-graph<-ggplot()+geom_line(aes(x=time$day,y=time$dayCount,color="Count vs Day"
-                              #,color=time$Severity
-                              ),data = time,stat = "identity")+labs(x="Year",y="Count")+geom_smooth()#+
-
-#scale_color_manual(values = c(""))
-
-ggplotly(graph)
-```
-
-```{r}
-#McKenna Code:
-
+```{r, fig.width=10}
 durationMapData <- Full_Duration %>% mutate(subregion=tolower(County), region=tolower(abbr2state(State))) %>% select(subregion, region, duration) %>% group_by(subregion,region) %>% summarize(medianDuration = median(duration)) %>% mutate(durationFactor = ifelse(medianDuration<1200,1,
                                               ifelse(medianDuration<2400, 2,
                                               ifelse(medianDuration<3600, 3,
@@ -194,5 +98,10 @@ FullWeather %>% filter(!is.na(relativeTemp) & !is.na(relWind)) %>%  ggplot(aes(x
 FullWeather$relativeTemp <- factor(FullWeather$relativeTemp, levels= rev(levels(FullWeather$relativeTemp)))
 
 FullWeather %>% filter(!is.na(relativeTemp) & !is.na(relWind)) %>% ggplot(aes(x=Severity, fill=relativeTemp, y=1)) + geom_bar(stat="identity", position="fill") + facet_wrap(~relWind) + scale_fill_manual(values = c("goldenrod","steelblue1", "steelblue2","steelblue3", "steelblue4")) + labs(title="Weather vs Severity of Accidents", y="Temperature Proportion (%)")
-
 ```
+
+
+References:
+- colors from: http://sape.inf.usi.ch/quick-reference/ggplot2/colour
+
+- https://stackoverflow.com/questions/52602503/display-an-axis-value-in-millions-in-ggplot 
