@@ -125,36 +125,28 @@ time<-fullData %>%
   unite(col = "Start_Date2", c(Start_Year,Start_Day,Start_Month),sep = "-",remove=FALSE)%>%
   group_by(Start_Date2) %>%
   mutate(dayCount = n())
+#plotted the months to see which months were the most hazardous
 ggplot(time,aes(x=Start_Month))+geom_bar()+labs(x="Month",title = "Frequency of accidents by month")+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))
-```
-
-
-```{r}
+#got the distinct days so that we do not have to wait 5 years to load the data and to ensure the data does not overlap
  time<-time %>%
    distinct(Start_Date2,.keep_all = TRUE)
-# time
-# plot_ly(time,x=~Start_Day, y=~Start_Month,z=~Start_Year,type='scatter3d',mode='markers',color=~dayCount)
+
 ```
 
 
 ```{r}
+#got the different days accident count to start seeing trends with the days
 graph<-ggplot(time,aes(x=time$Start_Month, y=time$Start_Day,color=time$dayCount))+facet_wrap(time$Start_Year)+geom_point()+ scale_x_continuous(name = " ", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+labs(x="Month",y="Day",color="Count",title = "Each day's accident number from 2017-2019")+ scale_colour_gradientn(colours = terrain.colors(10))
 ggplotly(graph)
 ```
 
 ```{r}
-
+#formatted to get dates on the x axis
 time$Severity<-as.factor(time$Severity)
 time$day<-ydm(time$Start_Date2)
-
-```
-
-```{r}
+#graphed progression line to show trend over time
 graph<-ggplot()+geom_line(aes(x=time$day,y=time$dayCount,color="Count vs Day"
-                              #,color=time$Severity
-                              ),data = time,stat = "identity")+labs(x="Year",y="Count")+geom_smooth()#+
-
-#scale_color_manual(values = c(""))
+                              ),data = time,stat = "identity")+labs(x="Year",y="Count")+geom_smooth()
 
 ggplotly(graph)
 ```
