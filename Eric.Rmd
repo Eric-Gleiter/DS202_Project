@@ -102,7 +102,7 @@ ggplot(fullCounties,aes(x=long,y=lat)) +
              size=0.02)+ 
   xlab("Longitude") + 
   ylab("Latitude") + 
-  labs(title = "Accdient Locations by Longitude and Latitude")
+  labs(title = "Accident Locations by Longitude and Latitude")
 
 
 ggplot(meanSeverityMap, aes(x=long,y=lat,fill = meanSeverity))+
